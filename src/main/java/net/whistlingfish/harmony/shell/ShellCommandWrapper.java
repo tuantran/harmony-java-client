@@ -12,6 +12,7 @@ public class ShellCommandWrapper {
     @SubCommands({ @SubCommand(name = "get_config", impl = GetConfigCommand.class),
                   @SubCommand(name = "press", impl = PressButtonCommand.class),
                   @SubCommand(name = "start", impl = StartActivityCommand.class),
+                  @SubCommand(name = "end", impl = EndActivityCommand.class),
                   @SubCommand(name = "list", impl = ListCommand.class),
                   @SubCommand(name = "show", impl = ShowCommand.class), })
     private ShellCommand command;

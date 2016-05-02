@@ -9,6 +9,7 @@ import net.whistlingfish.harmony.protocol.MessageGetCurrentActivity.GetCurrentAc
 import net.whistlingfish.harmony.protocol.MessageHoldAction.HoldActionReplyParser;
 import net.whistlingfish.harmony.protocol.MessagePing.PingReplyParser;
 import net.whistlingfish.harmony.protocol.MessageStartActivity.StartActivityReplyParser;
+import net.whistlingfish.harmony.protocol.MessageEndActivity.EndActivityReplyParser;
 
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.IQProvider;
@@ -25,6 +26,8 @@ public class OAReplyProvider implements IQProvider {
         replyParsers.put(MessageGetCurrentActivity.MIME_TYPE, new GetCurrentActivityReplyParser());
         replyParsers.put(MessageStartActivity.MIME_TYPE, new StartActivityReplyParser());
         replyParsers.put(MessageStartActivity.MIME_TYPE2, new StartActivityReplyParser());
+        replyParsers.put(MessageEndActivity.MIME_TYPE, new EndActivityReplyParser());
+        replyParsers.put(MessageEndActivity.MIME_TYPE2, new EndActivityReplyParser());
         replyParsers.put(MessagePing.MIME_TYPE, new PingReplyParser());
     }
 
@@ -53,7 +56,8 @@ public class OAReplyProvider implements IQProvider {
         String mimeType = parser.getAttributeValue(null, "mime");
         OAReplyParser replyParser = replyParsers.get(mimeType);
         if (replyParser == null) {
-            throw new HarmonyProtocolException(format("Unable to handle reply type '%s'", mimeType));
+            throw new HarmonyProtocolException(format("Unable to handle reply type '%s' [%s]: %s", mimeType, statusCode,
+                    attrs.get("errorstring")));
         }
         if (!replyParser.validResponseCode(statusCode)) {
             throw new HarmonyProtocolException(format("Got error response [%s]: %s", statusCode,

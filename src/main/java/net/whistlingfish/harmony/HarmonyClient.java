@@ -29,6 +29,7 @@ import net.whistlingfish.harmony.protocol.MessagePing.PingReply;
 import net.whistlingfish.harmony.protocol.MessagePing.PingRequest;
 import net.whistlingfish.harmony.protocol.MessageStartActivity.StartActivityReply;
 import net.whistlingfish.harmony.protocol.MessageStartActivity.StartActivityRequest;
+import net.whistlingfish.harmony.protocol.MessageEndActivity.*;
 import net.whistlingfish.harmony.protocol.OAPacket;
 import net.whistlingfish.harmony.protocol.OAReplyFilter;
 
@@ -62,7 +63,7 @@ public class HarmonyClient {
     private static final Logger logger = LoggerFactory.getLogger(HarmonyClient.class);
 
     public static final int DEFAULT_REPLY_TIMEOUT = 30_000;
-    public static final int START_ACTIVITY_REPLY_TIMEOUT = 30_000;
+    public static final int ACTIVITY_REPLY_TIMEOUT = 30_000;
 
     private static final int DEFAULT_PORT = 5222;
     private static final String DEFAULT_XMPP_USER = "guest@connect.logitech.com/gatorade.";
@@ -362,7 +363,7 @@ public class HarmonyClient {
             throw new IllegalArgumentException(format("Unknown activity '%d'", activityId));
         }
         sendOAPacket(connection, new StartActivityRequest(activityId), StartActivityReply.class,
-                START_ACTIVITY_REPLY_TIMEOUT);
+                ACTIVITY_REPLY_TIMEOUT);
     }
 
     public void startActivityByName(String label) {
@@ -371,5 +372,21 @@ public class HarmonyClient {
             throw new IllegalArgumentException(format("Unknown activity '%s'", label));
         }
         startActivity(activity.getId());
+    }
+
+    public void endActivity(int activityId) {
+        if (getConfig().getActivityById(activityId) == null) {
+            throw new IllegalArgumentException(format("Unknown activity '%d'", activityId));
+        }
+        sendOAPacket(connection, new EndActivityRequest(activityId), EndActivityReply.class,
+                ACTIVITY_REPLY_TIMEOUT);
+    }
+
+    public void endActivityByName(String label) {
+        Activity activity = getConfig().getActivityByName(label);
+        if (activity == null) {
+            throw new IllegalArgumentException(format("Unknown activity '%s'", label));
+        }
+        endActivity(activity.getId());
     }
 }
