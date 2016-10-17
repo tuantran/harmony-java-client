@@ -11,7 +11,7 @@ public class PressButtonCommand extends ShellCommand {
     @Argument(required = true, index = 1)
     private String button;
 
-    @Argument(required = false, index= 2)
+    @Argument(required = true, index= 2)
     private String pressTime;
 
     @Override
