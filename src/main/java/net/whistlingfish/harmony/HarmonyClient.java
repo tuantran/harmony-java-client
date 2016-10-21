@@ -329,14 +329,19 @@ public class HarmonyClient {
     }
 
     public void pressButton(int deviceId, String button) {
+        pressButton(deviceId,button,200);
+    }
+
+    public void pressButton(int deviceId, String button, int pressTime) {
         sendOAPacket(connection, new HoldActionRequest(deviceId, button, PRESS));
         try {
-            Thread.sleep(200);
+            Thread.sleep(pressTime);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
         sendOAPacket(connection, new HoldActionRequest(deviceId, button, RELEASE));
     }
+
 
     public void pressButton(String deviceName, String button) {
         Device device = getConfig().getDeviceByName(deviceName);

@@ -11,10 +11,19 @@ public class PressButtonCommand extends ShellCommand {
     @Argument(required = true, index = 1)
     private String button;
 
+    @Argument(required = true, index= 2)
+    private String pressTime;
+
     @Override
     public void execute(HarmonyClient harmonyClient) {
         try {
-            harmonyClient.pressButton(Integer.parseInt(deviceId), button);
+            if (pressTime!=null) {
+                harmonyClient.pressButton(Integer.parseInt(deviceId),button, Integer.parseInt(pressTime));
+            }
+            else {
+                harmonyClient.pressButton(Integer.parseInt(deviceId), button);
+            }
+
         } catch (NumberFormatException e) {
             harmonyClient.pressButton(deviceId, button);
         }
