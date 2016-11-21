@@ -10,14 +10,10 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.inject.Inject;
-
 import net.whistlingfish.harmony.config.Activity;
 import net.whistlingfish.harmony.config.Device;
 import net.whistlingfish.harmony.config.HarmonyConfig;
-import net.whistlingfish.harmony.protocol.AuthService;
 import net.whistlingfish.harmony.protocol.EmptyIncrementedIdReplyFilter;
-import net.whistlingfish.harmony.protocol.LoginToken;
 import net.whistlingfish.harmony.protocol.MessageAuth.AuthReply;
 import net.whistlingfish.harmony.protocol.MessageAuth.AuthRequest;
 import net.whistlingfish.harmony.protocol.MessageGetConfig.GetConfigReply;
@@ -78,9 +74,6 @@ public class HarmonyClient {
      */
     private ReentrantLock messageLock = new ReentrantLock();
 
-    @Inject
-    private AuthService authService;
-
     private HarmonyConfig config;
 
     private Activity currentActivity;
@@ -105,21 +98,25 @@ public class HarmonyClient {
             heartbeat.cancel(false);
         }
     }
-    
-    public void connect(String host, String username, String password) {
-        // First get a login token from Logitech
-        LoginToken loginToken = authService.getLoginToken(username, password);
 
+    // This method is for backwards compatibility
+    public void connect(String host, String username, String password) {
+    	this.connect(host);
+    }
+    
+    // No need for username password with pair method
+    public void connect(String host) {
         ConnectionConfiguration connectionConfig = createConnectionConfig(host, DEFAULT_PORT);
         XMPPTCPConnection authConnection = new XMPPTCPConnection(connectionConfig);
         try {
             addPacketLogging(authConnection, "auth");
 
+            // Pair with the local hub and get the token
             authConnection.connect();
             authConnection.login(DEFAULT_XMPP_USER, DEFAULT_XMPP_PASSWORD, "auth");
             authConnection.setFromMode(FromMode.USER);
 
-            AuthRequest sessionRequest = createSessionRequest(loginToken);
+            AuthRequest sessionRequest = createPairSessionRequest();
             AuthReply oaResponse = sendOAPacket(authConnection, sessionRequest, AuthReply.class);
 
             authConnection.disconnect();
@@ -320,8 +317,8 @@ public class HarmonyClient {
         return config;
     }
 
-    private AuthRequest createSessionRequest(LoginToken loginToken) {
-        return new AuthRequest(loginToken);
+    private AuthRequest createPairSessionRequest() {
+        return new AuthRequest();
     }
 
     public void sendPing() {
